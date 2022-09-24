@@ -1,6 +1,5 @@
 const WebSocket = require('ws');
-const { chromium } = require('playwright');
-//const { chromium } = require('playwright-chromium');
+const { chromium } = require('playwright-chromium');
 const Captcha = require('2captcha');
 var solver = new Captcha.Solver('dccb4d33bf7a7c8187030447cac8758e');
 
@@ -335,8 +334,7 @@ async function claim() {
 
 async function racc(u, i) {
   ant = 1;
-  const browser = await chromium.launch({ headless: false });
-  //const browser = await chromium.launch({ chromiumSandbox: false });
+  const browser = await chromium.launch({ chromiumSandbox: false });
   try {
     console.log('Username : ' + u + ' ' + i);
     const context = await browser.newContext({ locale: 'en-GB' });
