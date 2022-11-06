@@ -1,12 +1,9 @@
 const WebSocket = require('ws');
 const { chromium } = require('playwright-chromium');
 const Captcha = require('2captcha');
-var solver = new Captcha.Solver('dccb4d33bf7a7c8187030447cac8758e');
+var solver = new Captcha.Solver('peterparkson');
 
-var accounts = [    "",
-    "sinkingshapeles",
-    "actioninflamed",
-]
+var accounts = ['', 'grownupmissing','discoverypartis'];
 
 var captchas = [];
 
@@ -27,10 +24,14 @@ function app() {
 
   ws.on('open', function open() {
     ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
-    ws.send('PASS oauth:8pa82bwmzlfw5gb9e6kc8ye8e6cwqe');
-    ws.send('NICK 01thesoupgamer');
-    ws.send('USER 01thesoupgamer 8 * :01thesoupgamer');
+    ws.send('PASS oauth:aasiocnxbd2u27m9hu81cazlhii7p5');
+    ws.send('NICK lemuruid');
+    ws.send('USER lemuruid 8 * :lemuruid');
     ws.send('JOIN #polainum');
+    ws.send(
+      '@client-nonce=0b36720558db13d2a138cc4039bb9d8f PRIVMSG #polainum :Worker accounts : ' +
+        accounts
+    );
     setInterval(() => {
       ws.send('3');
     }, 2000);
@@ -40,7 +41,7 @@ function app() {
     var g = message.data.split(';');
 
     if (g.length == 17) {
-      if (g[4].match(/polainum/i)) {
+      if (g[4].match(/polai/i)) {
         var msg = g[16].split(':')[2].trim();
 
         switch (msg) {
@@ -52,6 +53,15 @@ function app() {
             ant = 0;
             bypas = 0;
             claims = 0;
+            break;
+          case 'balance':
+            getbalance();
+            break;
+            case 'checkfree':
+                checkfree()
+                break;
+          case 'bet':
+            bet();
             break;
           case 'ws':
             if (vs === 1) {
@@ -129,6 +139,16 @@ function app() {
 }
 app();
 
+gamws();
+
+accounts.forEach((u, i) => {
+  if (u.length < 3) {
+    return;
+  } else {
+    racc(u, i);
+  }
+});
+
 async function gamws() {
   vs = 1;
   console.log('trying to lsitening rain');
@@ -137,7 +157,7 @@ async function gamws() {
     {
       origin: 'https://trgamdom.com',
       headers: {
-        Cookie: "you_are_being_scammed_NEVER_send_this_to_anyone!_And_don't_expect_us_to_refund_you_either_if_you_get_scammed_by_sending_someone_the_value_of_this_cookie._None_of_our_support_will_ever_ask_you_for_it%2C_there_is_no_bullshit_secret_jackpot_you_get_by_ignoring_this%2C_you'll_just_get_your_money_taken._Whoever_you_have_been_interacting_with_is_a_scammer%2C_please_report_them_to_us.____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________.1c692318-1773-4dc8-b0ab-a0f32c15b93d",
+        Cookie: 'you_are_being_scammed_NEVER_send_this_to_anyone!_And_don't_expect_us_to_refund_you_either_if_you_get_scammed_by_sending_someone_the_value_of_this_cookie._None_of_our_support_will_ever_ask_you_for_it%2C_there_is_no_bullshit_secret_jackpot_you_get_by_ignoring_this%2C_you'll_just_get_your_money_taken._Whoever_you_have_been_interacting_with_is_a_scammer%2C_please_report_them_to_us.____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________.1c692318-1773-4dc8-b0ab-a0f32c15b93d',
       },
     }
   );
@@ -174,6 +194,9 @@ async function gamws() {
         var rainamount = Number(raina[0]);
         if (msg.data.includes(false) || msg.data.includes('false')) {
           claim();
+          setTimeout(() => {
+            bet();
+          }, 180000);
         }
       }
     }
@@ -198,7 +221,7 @@ async function bypass() {
         solver
           .hcaptcha(
             '6c6dfaea-16cc-4db1-b94c-c9c13b712617',
-            "https://trgamdom.com/"
+            'https://trgamdom.com/'
           )
           .then((res) => {
             captchas.push(res.data);
@@ -340,7 +363,7 @@ async function racc(u, i) {
     const context = await browser.newContext({ locale: 'en-GB' });
     const gamdom = await context.newPage();
     gamdom.goto('https://trgamdom.com');
-    await new Promise((resolve) => setTimeout(resolve, i * 30000));
+    await new Promise((resolve) => setTimeout(resolve, i * 10000));
     async function xx() {
       const data = await {
         a: u,
@@ -377,30 +400,25 @@ async function racc(u, i) {
           }, 5000)
         );
       }, data);
-      await new Promise((resolve) => setTimeout(resolve, i * 30000));
+      await new Promise((resolve) => setTimeout(resolve, i * 10000));
       const cookies = await context.cookies('https://trgamdom.com/');
-      const authToken = await cookies.find(
-        (cookie) => cookie.name === 'secret_session_do_not_share'
-      ).value;
-      const LaUserDetails = await cookies.find(
-        (cookie) => cookie.name === 'LaUserDetails'
-      ).value;
-      if (
-        authToken === undefined ||
-        authToken ||
-        null ||
-        LaUserDetails === undefined ||
-        LaUserDetails === null
-      ) {
-        racc, u, i;
+      try {
+        const authToken = await cookies.find(
+          (cookie) => cookie.name === 'secret_session_do_not_share'
+        ).value;
+        const LaUserDetails = await cookies.find(
+          (cookie) => cookie.name === 'LaUserDetails'
+        ).value;
+        var session =
+          'secret_session_do_not_share=' +
+          authToken +
+          ';LaUserDetails=' +
+          LaUserDetails;
+        sessions.push(session);
+        await browser.close();
+      } catch (e) {
+        racc(u, i);
       }
-      var session =
-        'secret_session_do_not_share=' +
-        authToken +
-        ';LaUserDetails=' +
-        LaUserDetails;
-      sessions.push(session);
-      await browser.close();
     }
     xx();
   } catch (e) {
@@ -409,3 +427,184 @@ async function racc(u, i) {
     racc(u, i);
   }
 }
+
+// BET
+
+async function bet() {
+  sessions.forEach((u, i) => {
+    var ws = new WebSocket(
+      'wss://trgamdom.com/socket.io/?EIO=3&transport=websocket',
+      {
+        origin: 'https://trgamdom.com',
+        headers: {
+          Cookie: u,
+        },
+      }
+    );
+
+    ws.on('open', function () {
+      ws.send('40/general,');
+      ws.send('40/tradeup,');
+      ws.send('42/chat,0["join",["english","turkish"]]');
+      setTimeout(() => {
+        ws.send('42/general,0["get_wallets",null]');
+      }, 1000);
+      setInterval(() => {
+        ws.send('2');
+      }, 2000);
+    });
+
+    ws.onmessage = function (msg) {
+      if (msg.data.includes('unit') && msg.data.length < 1500) {
+        var bla = msg.data.split(':')[2];
+        var balance = bla.split(',')[0];
+
+        // BET GELİCEK
+
+        var ws = new WebSocket(
+          'wss://trgamdom.com/socket.io/?EIO=3&transport=websocket',
+          {
+            origin: 'https://trgamdom.com',
+            headers: {
+              Cookie: u,
+            },
+          }
+        );
+
+        ws.on('open', function () {
+          ws.send('40/general,');
+          ws.send('40/tradeup,');
+          ws.send('42/chat,0["join",["english","turkish"]]');
+          setTimeout(() => {
+            ws.send(
+              '42/tradeup,0["createTradeup",{"bet":{"type":"coins","amount":' +
+                balance +
+                '},"target":{"type":"coins","amount":8325},"displayReversed":false,"animationDuration":2900,"isAutobet":false,"walletInfo":{"amount":15,"unit":"COINS","displayCurrency":"USD"}}]'
+            );
+            setTimeout(() => {
+              ws.close();
+            }, 2500);
+          }, 1000);
+          setInterval(() => {
+            ws.send('2');
+          }, 2000);
+        });
+      }
+    };
+
+    setTimeout(() => {
+      ws.close();
+    }, 30000);
+  });
+}
+
+// balance
+
+async function getbalance() {
+  sessions.forEach((u, i) => {
+    var ws = new WebSocket(
+      'wss://trgamdom.com/socket.io/?EIO=3&transport=websocket',
+      {
+        origin: 'https://trgamdom.com',
+        headers: {
+          Cookie: u,
+        },
+      }
+    );
+
+    ws.on('open', function () {
+      ws.send('40/general,');
+      ws.send('40/tradeup,');
+      ws.send('42/chat,0["join",["english","turkish"]]');
+      setTimeout(() => {
+        ws.send('42/general,0["get_wallets",null]');
+      }, 1000);
+      setInterval(() => {
+        ws.send('2');
+      }, 2000);
+    });
+
+    ws.onmessage = function (msg) {
+      if (msg.data.includes('unit') && msg.data.length < 1500) {
+        var bla = msg.data.split(':')[2];
+        var balance = bla.split(',')[0];
+        if (balance > -1) {
+          const ws = new WebSocket('wss://irc-ws.chat.twitch.tv/');
+
+          ws.on('open', function open() {
+            ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+            ws.send('PASS oauth:aasiocnxbd2u27m9hu81cazlhii7p5');
+            ws.send('NICK lemuruid');
+            ws.send('USER lemuruid 8 * :lemuruid');
+            ws.send('JOIN #polainum');
+            ws.send(
+              '@client-nonce=0b36720558db13d2a138cc4039bb9d8f PRIVMSG #polainum :' +
+                accounts[i + 1] +
+                ' balance is : ' +
+                balance
+            );
+            setInterval(() => {
+              ws.send('3');
+            }, 2000);
+          });
+        }
+
+        console.log(accounts[i + 1] + ' balance is : $' + balance / 1500);
+        ws.close();
+      }
+    };
+  });
+}
+
+function checkfree(){
+    sessions.forEach((u, i) => {
+
+    var ws = new WebSocket(
+        'wss://trgamdom.com/socket.io/?EIO=3&transport=websocket',
+        {
+          origin: 'https://trgamdom.com',
+          headers: {
+            Cookie: u,
+          },
+        }
+      );
+    
+    
+      ws.on('open', function () {
+        console.log('Listening...');
+        ws.send('40/general,');
+        ws.send('40/p2p,');
+        ws.send('42/general,0["get_wallets",null]');
+        ws.send('40/crypto,');
+        ws.send(
+          '42/general,1["get_currency",{"displayCurrency":"USD","walletUnit":"COINS"}]'
+        );
+        ws.send('42/general,1["get_wallets",null]')
+        setInterval(() => {
+          ws.send('2');
+        }, 2000);
+      });
+    
+      ws.onmessage = function (msg) {
+        if(msg.data.includes('notifications')){
+            if(msg.data.split('data')[1]) {
+                console.log(msg.data.split('data')[1])
+            } else {
+                console.log('No free spins in account.')
+            }
+        }
+      };
+    
+      ws.onerror = function (msg) {
+        setTimeout(() => {
+          checkfree();
+        }, 2500);
+      };
+    
+      setTimeout(() => {
+        console.log('Free Spins is closed.');
+        ws.close();
+      }, 30000);
+    })
+    
+    }
