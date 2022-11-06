@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const { chromium } = require('playwright-chromium');
 const Captcha = require('2captcha');
 var solver = new Captcha.Solver('peterparkson');
-
+console.log('maretu presents');
 var accounts = ['', 'grownupmissing','discoverypartis'];
 
 var captchas = [];
